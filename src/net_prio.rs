@@ -8,8 +8,7 @@
 //! See the Kernel's documentation for more information about this subsystem, found at:
 //!  [Documentation/cgroup-v1/net_prio.txt](https://www.kernel.org/doc/Documentation/cgroup-v1/net_prio.txt)
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::{BufRead, BufReader, Read, Write};
+use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;
 
 use crate::error::ErrorKind::*;
@@ -18,6 +17,7 @@ use crate::error::*;
 use crate::{
     ControllIdentifier, ControllerInternal, Controllers, NetworkResources, Resources, Subsystem,
 };
+use crate::read_u64_from;
 
 /// A controller that allows controlling the `net_prio` subsystem of a Cgroup.
 ///
@@ -76,17 +76,6 @@ impl<'a> From<&'a Subsystem> for &'a NetPrioController {
                 }
             }
         }
-    }
-}
-
-fn read_u64_from(mut file: File) -> Result<u64> {
-    let mut string = String::new();
-    match file.read_to_string(&mut string) {
-        Ok(_) => string
-            .trim()
-            .parse()
-            .map_err(|e| Error::with_cause(ParseError, e)),
-        Err(e) => Err(Error::with_cause(ReadFailed, e)),
     }
 }
 
