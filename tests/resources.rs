@@ -6,7 +6,7 @@
 
 //! Integration test about setting resources using `apply()`
 use cgroups::pid::PidController;
-use cgroups::{Cgroup, Hierarchy, MaxValue, PidResources, Resources};
+use cgroups::{Cgroup, MaxValue, PidResources, Resources};
 
 #[test]
 fn pid_resources() {

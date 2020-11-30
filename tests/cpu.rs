@@ -5,10 +5,8 @@
 
 //! Simple unit tests about the CPU control groups system.
 use cgroups::cpu::CpuController;
-use cgroups::error::ErrorKind;
-use cgroups::{Cgroup, CgroupPid, CpuResources, Hierarchy, Resources};
 
-use std::fs;
+use cgroups::Cgroup;
 
 #[test]
 fn test_cfs_quota_and_periods() {
@@ -27,7 +25,7 @@ fn test_cfs_quota_and_periods() {
     assert_eq!(100000, current_peroid);
 
     // case 1 set quota
-    let r = cpu_controller.set_cfs_quota(2000);
+    let _r = cpu_controller.set_cfs_quota(2000);
 
     let current_quota = cpu_controller.cfs_quota().unwrap();
     let current_peroid = cpu_controller.cfs_period().unwrap();

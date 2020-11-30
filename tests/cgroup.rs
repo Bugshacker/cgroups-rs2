@@ -5,7 +5,7 @@
 //
 
 //! Simple unit tests about the control groups system.
-use cgroups::memory::{MemController, SetMemory};
+use cgroups::memory::MemController;
 use cgroups::Controller;
 use cgroups::{Cgroup, CgroupPid, Hierarchy, Subsystem};
 use std::collections::HashMap;

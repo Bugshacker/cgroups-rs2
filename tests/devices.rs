@@ -7,7 +7,7 @@
 //! Integration tests about the devices subsystem
 
 use cgroups::devices::{DevicePermissions, DeviceType, DevicesController};
-use cgroups::{Cgroup, DeviceResource, Hierarchy};
+use cgroups::{Cgroup, DeviceResource};
 
 #[test]
 fn test_devices_parsing() {

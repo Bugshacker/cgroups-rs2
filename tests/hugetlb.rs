@@ -5,10 +5,9 @@
 
 //! Integration tests about the hugetlb subsystem
 use cgroups::hugetlb::{self, HugeTlbController};
+use cgroups::Cgroup;
 use cgroups::Controller;
-use cgroups::{Cgroup, Hierarchy};
 
-use cgroups::error::ErrorKind::*;
 use cgroups::error::*;
 use std::fs;
 
@@ -24,7 +23,7 @@ fn test_hugetlb_sizes() {
     let cg = Cgroup::new(h, String::from("test_hugetlb_sizes"));
     {
         let hugetlb_controller: &HugeTlbController = cg.controller_of().unwrap();
-        let sizes = hugetlb_controller.get_sizes();
+        let _sizes = hugetlb_controller.get_sizes();
 
         // test sizes count
         let sizes = hugetlb_controller.get_sizes();
