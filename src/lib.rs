@@ -189,6 +189,14 @@ mod sealed {
 
             std::path::Path::new(p).exists()
         }
+
+        fn open_write_all(&self, file: &str, buffer: &[u8], w: bool) -> Result<()> {
+            self.open_path(file, w)
+                .and_then(|mut file| {
+                    file.write_all(buffer)
+                        .map_err(|e| Error::with_cause(WriteFailed, e))
+                })
+        }
     }
 }
 
