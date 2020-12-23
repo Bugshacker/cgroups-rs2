@@ -5,23 +5,21 @@
 //
 
 //! Integration test about setting resources using `apply()`
-use cgroups::pid::PidController;
-use cgroups::{Cgroup, MaxValue, PidResources, Resources};
+use cgroups_rs::pid::PidController;
+use cgroups_rs::{Cgroup, MaxValue, PidResources, Resources};
 
 #[test]
 fn pid_resources() {
-    let h = cgroups::hierarchies::auto();
-    let h = Box::new(&*h);
+    let h = cgroups_rs::hierarchies::auto();
     let cg = Cgroup::new(h, String::from("pid_resources"));
     {
         let res = Resources {
             pid: PidResources {
-                update_values: true,
-                maximum_number_of_processes: MaxValue::Value(512),
+                maximum_number_of_processes: Some(MaxValue::Value(512)),
             },
             ..Default::default()
         };
-        cg.apply(&res);
+        cg.apply(&res).unwrap();
 
         // verify
         let pidcontroller: &PidController = cg.controller_of().unwrap();
@@ -29,5 +27,5 @@ fn pid_resources() {
         assert_eq!(pid_max.is_ok(), true);
         assert_eq!(pid_max.unwrap(), MaxValue::Value(512));
     }
-    cg.delete();
+    cg.delete().unwrap();
 }

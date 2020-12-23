@@ -54,14 +54,13 @@ impl ControllerInternal for HugeTlbController {
         // get the resources that apply to this controller
         let res: &HugePageResources = &res.hugepages;
 
-        if res.update_values {
-            for i in &res.limits {
-                let _ = self.set_limit_in_bytes(&i.size, i.limit);
-                if self.limit_in_bytes(&i.size)? != i.limit {
-                    return Err(Error::new(Other));
-                }
+        for i in &res.limits {
+            let _ = self.set_limit_in_bytes(&i.size, i.limit);
+            if self.limit_in_bytes(&i.size)? != i.limit {
+                return Err(Error::new(Other));
             }
         }
+
         Ok(())
     }
 }
@@ -88,12 +87,8 @@ impl<'a> From<&'a Subsystem> for &'a HugeTlbController {
 }
 
 impl HugeTlbController {
-    /// Constructs a new `HugeTlbController` with `oroot` serving as the root of the control group.
-    pub fn new(oroot: PathBuf, v2: bool) -> Self {
-        let mut root = oroot;
-        if !v2 {
-            root.push(Self::controller_type().to_string());
-        }
+    /// Constructs a new `HugeTlbController` with `root` serving as the root of the control group.
+    pub fn new(root: PathBuf, v2: bool) -> Self {
         let sizes = get_hugepage_sizes().unwrap();
         Self {
             base: root.clone(),

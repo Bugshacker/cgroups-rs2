@@ -5,15 +5,13 @@
 //
 
 //! Simple unit tests about the control groups system.
-use cgroups::memory::MemController;
-use cgroups::Controller;
-use cgroups::{Cgroup, CgroupPid, Hierarchy, Subsystem};
-use std::collections::HashMap;
+use cgroups_rs::memory::MemController;
+use cgroups_rs::Controller;
+use cgroups_rs::{Cgroup, CgroupPid, Subsystem};
 
 #[test]
 fn test_tasks_iterator() {
-    let h = cgroups::hierarchies::auto();
-    let h = Box::new(&*h);
+    let h = cgroups_rs::hierarchies::auto();
     let pid = libc::pid_t::from(nix::unistd::getpid()) as u64;
     let cg = Cgroup::new(h, String::from("test_tasks_iterator"));
     {
@@ -35,23 +33,19 @@ fn test_tasks_iterator() {
         // Verify that it was indeed removed.
         assert_eq!(tasks.next(), None);
     }
-    cg.delete();
+    cg.delete().unwrap();
 }
 
 #[test]
 fn test_cgroup_with_relative_paths() {
-    if cgroups::hierarchies::is_cgroup2_unified_mode() {
+    if cgroups_rs::hierarchies::is_cgroup2_unified_mode() {
         return;
     }
-    let h = cgroups::hierarchies::auto();
+    let h = cgroups_rs::hierarchies::auto();
     let cgroup_root = h.root();
-    let h = Box::new(&*h);
-    let mut relative_paths = HashMap::new();
-    let mem_relative_path = "/mmm/abc/def";
-    relative_paths.insert("memory".to_string(), mem_relative_path.to_string());
     let cgroup_name = "test_cgroup_with_relative_paths";
 
-    let cg = Cgroup::new_with_relative_paths(h, String::from(cgroup_name), relative_paths);
+    let cg = Cgroup::load(h, String::from(cgroup_name));
     {
         let subsystems = cg.subsystems();
         subsystems.into_iter().for_each(|sub| match sub {
@@ -74,35 +68,29 @@ fn test_cgroup_with_relative_paths() {
                 // cgroup_path = cgroup_root + relative_path + cgroup_name
                 assert_eq!(
                     cgroup_path,
-                    format!(
-                        "{}/memory{}/{}",
-                        cgroup_root.to_str().unwrap(),
-                        mem_relative_path,
-                        cgroup_name
-                    )
+                    format!("{}/memory/{}", cgroup_root.to_str().unwrap(), cgroup_name)
                 );
             }
             _ => {}
         });
     }
-    cg.delete();
+    cg.delete().unwrap();
 }
 
 #[test]
 fn test_cgroup_v2() {
-    if !cgroups::hierarchies::is_cgroup2_unified_mode() {
+    if !cgroups_rs::hierarchies::is_cgroup2_unified_mode() {
         return;
     }
-    let h = cgroups::hierarchies::auto();
-    let h = Box::new(&*h);
-    let cg = Cgroup::new_with_relative_paths(h, String::from("test_v2"), HashMap::new());
+    let h = cgroups_rs::hierarchies::auto();
+    let cg = Cgroup::new(h, String::from("test_v2"));
 
     let mem_controller: &MemController = cg.controller_of().unwrap();
     let (mem, swp, rev) = (4 * 1024 * 1000, 2 * 1024 * 1000, 1024 * 1000);
 
-    let _ = mem_controller.set_limit(mem);
-    let _ = mem_controller.set_memswap_limit(swp);
-    let _ = mem_controller.set_soft_limit(rev);
+    mem_controller.set_limit(mem).unwrap();
+    mem_controller.set_memswap_limit(swp).unwrap();
+    mem_controller.set_soft_limit(rev).unwrap();
 
     let memory_stat = mem_controller.memory_stat();
     println!("memory_stat {:?}", memory_stat);
@@ -113,5 +101,5 @@ fn test_cgroup_v2() {
     println!("memswap {:?}", memswap);
     assert_eq!(swp, memswap.limit_in_bytes);
 
-    cg.delete();
+    cg.delete().unwrap();
 }

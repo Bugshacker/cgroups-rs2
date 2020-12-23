@@ -67,10 +67,8 @@ impl<'a> From<&'a Subsystem> for &'a RdmaController {
 }
 
 impl RdmaController {
-    /// Constructs a new `RdmaController` with `oroot` serving as the root of the control group.
-    pub fn new(oroot: PathBuf) -> Self {
-        let mut root = oroot;
-        root.push(Self::controller_type().to_string());
+    /// Constructs a new `RdmaController` with `root` serving as the root of the control group.
+    pub fn new(root: PathBuf) -> Self {
         Self {
             base: root.clone(),
             path: root,

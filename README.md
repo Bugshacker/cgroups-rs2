@@ -1,32 +1,36 @@
-# cgroups-rs ![Build](https://travis-ci.org/levex/cgroups-rs.svg?branch=master)
+# cgroups-rs ![Build](https://travis-ci.org/kata-containers/cgroups-rs.svg?branch=master)
 Native Rust library for managing control groups under Linux
 
-Right now the crate only support the original, V1 hierarchy, however support
-is planned for the Unified hierarchy.
+Both v1 and v2 of cgroups are supported.
 
 # Examples
 
 ## Create a control group using the builder pattern
 
 ``` rust
-// Acquire a handle for the V1 cgroup hierarchy.
-let hier = ::hierarchies::V1::new();
+
+
+use cgroups_rs::*;
+use cgroups_rs::cgroup_builder::*;
+
+// Acquire a handle for the cgroup hierarchy.
+let hier = cgroups_rs::hierarchies::auto();
 
 // Use the builder pattern (see the documentation to create the control group)
 //
 // This creates a control group named "example" in the V1 hierarchy.
-let cg: Cgroup = CgroupBuilder::new("example", &v1)
-	.cpu()
-		.shares(85)
-		.done()
-	.build();
+    let cg: Cgroup = CgroupBuilder::new("example")
+        .cpu()
+        .shares(85)
+        .done()
+        .build(hier);
 
 // Now `cg` is a control group that gets 85% of the CPU time in relative to
 // other control groups.
 
 // Get a handle to the CPU controller.
-let cpus: &CpuController = cg.controller_of().unwrap();
-cpus.add_task(1234u64);
+let cpus: &cgroups_rs::cpu::CpuController = cg.controller_of().unwrap();
+cpus.add_task(&CgroupPid::from(1234u64));
 
 // [...]
 

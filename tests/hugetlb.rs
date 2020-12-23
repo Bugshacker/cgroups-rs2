@@ -4,26 +4,23 @@
 //
 
 //! Integration tests about the hugetlb subsystem
-use cgroups::hugetlb::{self, HugeTlbController};
-use cgroups::Cgroup;
-use cgroups::Controller;
-
-use cgroups::error::*;
+use cgroups_rs::error::*;
+use cgroups_rs::hugetlb::{self, HugeTlbController};
+use cgroups_rs::Cgroup;
 use std::fs;
 
 #[test]
 fn test_hugetlb_sizes() {
     // now only v2
-    if cgroups::hierarchies::is_cgroup2_unified_mode() {
+    if cgroups_rs::hierarchies::is_cgroup2_unified_mode() {
         return;
     }
 
-    let h = cgroups::hierarchies::auto();
-    let h = Box::new(&*h);
+    let h = cgroups_rs::hierarchies::auto();
     let cg = Cgroup::new(h, String::from("test_hugetlb_sizes"));
     {
         let hugetlb_controller: &HugeTlbController = cg.controller_of().unwrap();
-        let _sizes = hugetlb_controller.get_sizes();
+        let _ = hugetlb_controller.get_sizes();
 
         // test sizes count
         let sizes = hugetlb_controller.get_sizes();
@@ -39,7 +36,7 @@ fn test_hugetlb_sizes() {
             assert_no_error(hugetlb_controller.max_usage_in_bytes(&size));
         }
     }
-    cg.delete();
+    cg.delete().unwrap();
 }
 
 fn assert_no_error(r: Result<u64>) {
